@@ -10,6 +10,7 @@ const port = 3000;
 
 // Game State
 let health = 100;
+let gameActive = false;
 
 // Initialize health from DB
 get(child(ref(db), 'health')).then((snapshot) => {
@@ -22,7 +23,7 @@ get(child(ref(db), 'health')).then((snapshot) => {
 
 // Decay logic: -1% every 2 seconds
 setInterval(() => {
-  if (health > 0) {
+  if (gameActive && health > 0) {
     health = Math.max(0, health - 1);
     set(ref(db, 'health'), health);
   }
@@ -76,6 +77,11 @@ const verifyPoW = (req: express.Request, res: express.Response, next: express.Ne
     res.status(403).json({ error: "Invalid Proof of Work solution" });
   }
 };
+
+app.post("/start", (req, res) => {
+  gameActive = true;
+  res.json({ message: "Game started" });
+});
 
 app.get("/health", async (req, res) => {
   try {
