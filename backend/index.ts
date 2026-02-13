@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import rateLimit from "express-rate-limit";
+import { rateLimit } from "express-rate-limit";
 import { createHash, randomBytes } from "crypto";
 import { db } from "./firebase.js";
 import { ref, push, set, get, child, serverTimestamp } from "firebase/database";
