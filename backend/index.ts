@@ -2,11 +2,15 @@ import express from "express";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import { createHash, randomBytes } from "crypto";
-import { db } from "./firebase";
+import { db } from "./firebase.js";
 import { ref, push, set, get, child, serverTimestamp } from "firebase/database";
 
 const app = express();
-app.use(cors("*"));
+app.use(cors({
+    origin: "*",
+    methods: ["GET", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "x-challenge", "x-nonce"]
+}));
 app.use(express.json());
 const port = 3000;
 
