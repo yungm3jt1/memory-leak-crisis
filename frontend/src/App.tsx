@@ -27,7 +27,16 @@ function App() {
   };
 
   const restartGame = async () => {
-    // ...existing code...
+    const reposne = await fetch("http://localhost:3000/start", {
+      method: "POST",
+    });
+    const data = await reposne.json();
+    if (reposne.ok) {
+      setHealth(data.health);
+      setAttackStatus("System rebooted. Health reset to 100%.");
+    } else {
+      setAttackStatus("Failed to reboot system");
+    }
   };
 
   const repairSystem = async () => {
@@ -79,16 +88,20 @@ function App() {
 
   useEffect(() => {
     const healthRef = ref(db, "health");
-    const unsubscribe = onValue(healthRef, (snapshot) => {
-      if (snapshot.exists()) {
-        setHealth(snapshot.val());
-      } else {
+    const unsubscribe = onValue(
+      healthRef,
+      (snapshot) => {
+        if (snapshot.exists()) {
+          setHealth(snapshot.val());
+        } else {
+          setHealth(0);
+        }
+      },
+      (error) => {
+        console.log("Firebase error:", error);
         setHealth(0);
-      }
-    }, (error) => {
-      console.log("Firebase error:", error);
-      setHealth(0);
-    });
+      },
+    );
 
     const interval = setInterval(() => {
       setRam(Math.floor(Math.random() * (64 - 16 + 1) + 16)); // 16-64GB
@@ -122,7 +135,11 @@ function App() {
       <div className="w-full max-w-3xl mb-12">
         <div className="flex justify-between text-xs text-gray-400 mb-2 uppercase tracking-widest">
           <span>{health <= 0 ? "System Failure" : "System Integrity"}</span>
-          <span className={health <= 0 ? "text-red-500 animate-pulse" : "text-green-500"}>
+          <span
+            className={
+              health <= 0 ? "text-red-500 animate-pulse" : "text-green-500"
+            }
+          >
             {health <= 0 ? "CRITICAL" : "Stable"}
           </span>
         </div>
@@ -159,11 +176,13 @@ function App() {
       </div>
 
       <div className="w-full max-w-3xl mt-12 p-6 border border-gray-900 bg-gray-950 rounded-lg">
-        <h2 className="text-xl font-bold mb-4 text-red-500 uppercase tracking-widest">Infiltration Module</h2>
-        
+        <h2 className="text-xl font-bold mb-4 text-red-500 uppercase tracking-widest">
+          Infiltration Module
+        </h2>
+
         <div className="flex flex-col gap-4">
           <div className="flex gap-4">
-            <button 
+            <button
               onClick={getChallenge}
               className="px-6 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-xs uppercase tracking-widest transition-colors font-bold"
             >
@@ -182,7 +201,7 @@ function App() {
               onChange={(e) => setNonce(e.target.value)}
               className="flex-1 bg-black border border-gray-800 p-2 text-sm font-mono focus:outline-none focus:border-red-900 text-white"
             />
-            <button 
+            <button
               onClick={sendAttack}
               className="px-8 py-2 bg-red-900 hover:bg-red-800 text-white text-xs uppercase tracking-widest transition-colors font-bold disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={!challenge || !nonce}
@@ -192,7 +211,9 @@ function App() {
           </div>
 
           {attackStatus && (
-            <div className={`text-xs mt-2 uppercase tracking-widest font-bold ${attackStatus.includes("Error") || attackStatus.includes("failed") ? "text-red-500" : "text-green-500"}`}>
+            <div
+              className={`text-xs mt-2 uppercase tracking-widest font-bold ${attackStatus.includes("Error") || attackStatus.includes("failed") ? "text-red-500" : "text-green-500"}`}
+            >
               {attackStatus}
             </div>
           )}
