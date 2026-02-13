@@ -74,7 +74,9 @@ const verifyPoW = (req: express.Request, res: express.Response, next: express.Ne
 
 app.post("/start", (req, res) => {
 	gameActive = true;
-	res.json({ message: "Game started" });
+	health = 100;
+	set(ref(db, 'health'), health);
+	res.json({ message: "Game started", health });
 });
 
 app.get("/health", async (req, res) => {
