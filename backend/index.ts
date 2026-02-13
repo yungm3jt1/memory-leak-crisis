@@ -18,31 +18,36 @@ let health = 100;
 let gameActive = true;
 
 // Sync initial state
-get(child(ref(db), 'status')).then((snapshot) => {
+get(child(ref(db), 'health')).then((snapshot) => {
 	if (snapshot.exists()) {
-		const data = snapshot.val();
-		health = data.health;
-		gameActive = data.gameActive;
+		health = snapshot.val();
 	} else {
-		set(ref(db, 'status'), { health, gameActive });
+		set(ref(db, 'health'), health);
+	}
+});
+
+get(child(ref(db), 'gameActive')).then((snapshot) => {
+	if (snapshot.exists()) {
+		gameActive = snapshot.val();
+	} else {
+		set(ref(db, 'gameActive'), gameActive);
 	}
 });
 
 // NOTE: setInterval might not run reliably on Serverless (Vercel)
 // Consider using a scheduled task (Cron) or timestamp-based calculation for production
 setInterval(async () => {
-    // Refresh state from DB to ensure we have latest allowed/blocked status (if multiple instances)
-    const snapshot = await get(child(ref(db), 'status'));
-    if(snapshot.exists()) {
-        const data = snapshot.val();
-        gameActive = data.gameActive;
-        health = data.health;
-    }
+    // Refresh state from DB
+    const healthSnap = await get(child(ref(db), 'health'));
+    const activeSnap = await get(child(ref(db), 'gameActive'));
+    
+    if(healthSnap.exists()) health = healthSnap.val();
+    if(activeSnap.exists()) gameActive = activeSnap.val();
 
 	if (gameActive && health > 0) {
 		health = Math.max(0, health - 1);
 		// Update DB
-        set(ref(db, 'status'), { health, gameActive });
+        set(ref(db, 'health'), health);
 	}
 }, 2000);
 
@@ -93,25 +98,18 @@ const verifyPoW = (req: express.Request, res: express.Response, next: express.Ne
 app.post("/start", (req, res) => {
 	gameActive = true;
 	health = 100;
-	set(ref(db, 'status'), { health, gameActive });
+	set(ref(db, 'health'), health);
+	set(ref(db, 'gameActive'), gameActive);
 	res.json({ message: "Game started", health });
 });
 
 app.get("/health", async (req, res) => {
 	try {
-		const snapshot = await get(child(ref(db), 'status'));
-        let currentHealth = health;
-        let currentGameActive = gameActive;
+		const snapshot = await get(child(ref(db), 'health'));
+		const currentHealth = snapshot.exists() ? snapshot.val() : health;
 
-		if (snapshot.exists()) {
-            const data = snapshot.val();
-            currentHealth = data.health;
-            currentGameActive = data.gameActive;
-            
-            // Sync local memory
-            health = currentHealth;
-            gameActive = currentGameActive;
-        }
+		// Sync local state if needed
+		if (snapshot.exists()) health = currentHealth;
 
 		if (currentHealth <= 0) {
 			res.json({ status: "SYSTEM DOWN", health: 0 });
@@ -125,28 +123,26 @@ app.get("/health", async (req, res) => {
 
 app.post("/repair", async (req: express.Request, res: express.Response) => {
     // Get latest state first
-    const snapshot = await get(child(ref(db), 'status'));
+    const snapshot = await get(child(ref(db), 'health'));
     if (snapshot.exists()) {
-        health = snapshot.val().health;
-        gameActive = snapshot.val().gameActive;
+        health = snapshot.val();
     }
 
 	health = Math.min(100, health + 5);
-	set(ref(db, 'status'), { health, gameActive });
+	set(ref(db, 'health'), health);
 
 	res.json({ message: "Repair initiated", health });
 });
 
 app.post("/attack", verifyPoW, async (req: express.Request, res: express.Response) => {
     // Get latest state first
-    const snapshot = await get(child(ref(db), 'status'));
+    const snapshot = await get(child(ref(db), 'health'));
     if (snapshot.exists()) {
-        health = snapshot.val().health;
-        gameActive = snapshot.val().gameActive;
+        health = snapshot.val();
     }
 
 	health = Math.max(0, health - 10);
-	set(ref(db, 'status'), { health, gameActive });
+	set(ref(db, 'health'), health);
 
 	res.json({ message: "Attack launched", health });
 });
