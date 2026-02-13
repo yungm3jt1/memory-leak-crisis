@@ -33,8 +33,6 @@ const limiter = rateLimit({
 	legacyHeaders: false,
 });
 
-app.use(limiter);
-
 const DIFFICULTY = 4; // Number of leading zeros required (adjust for load)
 const PREFIX = "0".repeat(DIFFICULTY);
 const activeChallenges = new Set<string>();
@@ -104,7 +102,7 @@ app.post("/repair", (req, res) => {
 	res.json({ message: "Repair initiated", health });
 });
 
-app.post("/attack", verifyPoW, (req, res) => {
+app.post("/attack", limiter, verifyPoW, (req, res) => {
 	health = Math.max(0, health - 10);
 	set(ref(db, 'health'), health);
 
