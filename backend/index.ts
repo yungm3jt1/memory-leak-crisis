@@ -66,6 +66,50 @@ const updateGameState = async () => {
     }
 };
 
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000,
+	limit: 100,
+	standardHeaders: true,
+	legacyHeaders: false,
+});
+
+const DIFFICULTY = 4; // Number of leading zeros required (adjust for load)
+const PREFIX = "0".repeat(DIFFICULTY);
+const activeChallenges = new Set<string>();
+
+app.get("/challenge", (req, res) => {
+	const challenge = randomBytes(16).toString("hex");
+	activeChallenges.add(challenge);
+
+	setTimeout(() => activeChallenges.delete(challenge), 2 * 60 * 1000);
+
+	res.json({ challenge, difficulty: DIFFICULTY });
+});
+
+const verifyPoW = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+	const challenge = req.headers["x-challenge"] as string;
+	const nonce = req.headers["x-nonce"] as string;
+
+	if (!challenge || !nonce) {
+		res.status(400).json({ error: "Missing Proof of Work headers (x-challenge, x-nonce)" });
+		return;
+	}
+
+	if (!activeChallenges.has(challenge)) {
+		res.status(403).json({ error: "Invalid or expired challenge" });
+		return;
+	}
+
+	const hash = createHash("sha256").update(challenge + nonce).digest("hex");
+
+	if (hash.startsWith(PREFIX)) {
+		activeChallenges.delete(challenge);
+		next();
+	} else {
+		res.status(403).json({ error: "Invalid Proof of Work solution" });
+	}
+};
+
 app.post("/start", (req, res) => {
 	gameActive = true;
 	health = 100;
