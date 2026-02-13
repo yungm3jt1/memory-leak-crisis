@@ -9,8 +9,8 @@ interface ApiResponse<T> {
 
 class HealthApi {
     private client: AxiosInstance;
-    
-    constructor(baseURL: string = 'http://localhost:3000/api') {
+
+    constructor(baseURL: string = 'http://localhost:3000/') {
         this.client = axios.create({
             baseURL,
             timeout: 10000,

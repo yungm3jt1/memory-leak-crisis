@@ -1,29 +1,36 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import Healthbar from "./components/healthbar";
-import healthApi from "./api/health";
+import { db } from "./firebase";
+import { ref, onValue } from "firebase/database";
 
 function App() {
   const [health, setHealth] = useState(100);
   const [ram, setRam] = useState(32);
   const [ping, setPing] = useState(20);
   useEffect(() => {
-    const checkHealth = async () => {
-      try {
-        const response = await healthApi.getHealth();
-        setHealth(parseInt(response.data.status));
-      } catch (error) {
+    // Subscribe to health value from Firebase Realtime Database
+    const healthRef = ref(db, "health");
+    const unsubscribe = onValue(healthRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setHealth(snapshot.val());
+      } else {
         setHealth(0);
-        console.log("jakis blad");
       }
-    };
-    checkHealth();
+    }, (error) => {
+      console.log("Firebase error:", error);
+      setHealth(0);
+    });
 
     const interval = setInterval(() => {
       setRam(Math.floor(Math.random() * (64 - 16 + 1) + 16)); // 16-64GB
       setPing(Math.floor(Math.random() * (32 - 10 + 1) + 10));
     }, 2000);
-    return () => clearInterval(interval);
+
+    return () => {
+      unsubscribe();
+      clearInterval(interval);
+    };
   }, []);
   return (
     <div className="w-screen h-screen bg-black flex flex-col items-center justify-center text-white font-mono p-8">
