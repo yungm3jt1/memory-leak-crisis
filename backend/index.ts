@@ -6,7 +6,7 @@ import { db } from "./firebase";
 import { ref, push, set, get, child, serverTimestamp } from "firebase/database";
 
 const app = express();
-app.use(cors());
+app.use(cors("*"));
 app.use(express.json());
 const port = 3000;
 
