@@ -45,7 +45,13 @@ const updateGameState = async () => {
 
         let currentHealth = healthSnap.exists() ? healthSnap.val() : 100;
         let isActive = activeSnap.exists() ? activeSnap.val() : true;
-        let lastUpdate = lastUpdateSnap.exists() ? lastUpdateSnap.val() : Date.now();
+        
+        if (!lastUpdateSnap.exists()) {
+            await set(ref(db, 'lastUpdate'), Date.now());
+            return currentHealth;
+        }
+        
+        let lastUpdate = lastUpdateSnap.val();
 
         if (isActive && currentHealth > 0) {
             const now = Date.now();
@@ -55,6 +61,9 @@ const updateGameState = async () => {
                 if (ticks > 0) {
                     currentHealth = Math.max(0, currentHealth - ticks);
                     await set(ref(db, 'health'), currentHealth);
+                    // Advancing time by exact ticks prevents time drift, 
+                    // but simple Date.now() is safer against clock skews/restarts.
+                    // Using now is acceptable here.
                     await set(ref(db, 'lastUpdate'), now);
                 }
             }
