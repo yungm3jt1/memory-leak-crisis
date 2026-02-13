@@ -27,19 +27,24 @@ function App() {
   };
 
   const restartGame = async () => {
+    // ...existing code...
+  };
+
+  const repairSystem = async () => {
     try {
-      setAttackStatus("Restarting system...");
-      const response = await fetch("http://localhost:3000/start", {
+      setAttackStatus("Initiating repair...");
+      const response = await fetch("http://localhost:3000/repair", {
         method: "POST",
       });
+      const data = await response.json();
       if (response.ok) {
-        setAttackStatus("System rebooted successfully");
+        setAttackStatus(`Repair successful! Health: ${data.health}%`);
       } else {
-        setAttackStatus("Reboot failed");
+        setAttackStatus("Repair failed");
       }
     } catch (error: any) {
-      console.error("Error restarting:", error);
-      setAttackStatus("Network error during reboot");
+      console.error("Error repairing:", error);
+      setAttackStatus("Network error during repair");
     }
   };
 
@@ -104,6 +109,14 @@ function App() {
         <div className="text-gray-500 tracking-[0.5em] uppercase text-sm">
           System Operational
         </div>
+        {health > 0 && health < 100 && (
+          <button
+            onClick={repairSystem}
+            className="mt-6 px-8 py-2 bg-blue-900 hover:bg-blue-800 border border-blue-700 text-white text-xs uppercase tracking-widest transition-all font-bold rounded"
+          >
+            MANUAL REPAIR (+5%)
+          </button>
+        )}
       </div>
 
       <div className="w-full max-w-3xl mb-12">

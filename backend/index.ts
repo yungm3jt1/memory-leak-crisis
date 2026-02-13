@@ -11,7 +11,7 @@ app.use(express.json());
 const port = 3000;
 
 let health = 100;
-let gameActive = false;
+let gameActive = true;
 
 get(child(ref(db), 'health')).then((snapshot) => {
 	if (snapshot.exists()) {
@@ -97,14 +97,14 @@ app.get("/health", async (req, res) => {
 	}
 });
 
-app.post("/repair", (req, res) => {
+app.post("/repair", (req: express.Request, res: express.Response) => {
 	health = Math.min(100, health + 5);
 	set(ref(db, 'health'), health);
 
 	res.json({ message: "Repair initiated", health });
 });
 
-app.post("/attack", limiter, verifyPoW, (req, res) => {
+app.post("/attack", verifyPoW, (req: express.Request, res: express.Response) => {
 	health = Math.max(0, health - 10);
 	set(ref(db, 'health'), health);
 
