@@ -122,7 +122,7 @@ function App() {
 
       setRam(Math.floor(Math.random() * (64 - 16 + 1) + 16)); // 16-64GB
       setPing(Math.floor(Math.random() * (32 - 10 + 1) + 10));
-    }, 2000);
+    }, 1000); // 1 second for smoother updates
 
     return () => {
       unsubscribe();

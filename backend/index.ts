@@ -61,10 +61,10 @@ const updateGameState = async () => {
                 if (ticks > 0) {
                     currentHealth = Math.max(0, currentHealth - ticks);
                     await set(ref(db, 'health'), currentHealth);
-                    // Advancing time by exact ticks prevents time drift, 
-                    // but simple Date.now() is safer against clock skews/restarts.
-                    // Using now is acceptable here.
-                    await set(ref(db, 'lastUpdate'), now);
+                    
+                    // Consume only the time used for ticks to keep remainder for next update
+                    // This prevents "losing" time and makes drops consistent
+                    await set(ref(db, 'lastUpdate'), lastUpdate + (ticks * 1000));
                 }
             }
         }
