@@ -10,7 +10,7 @@ interface ApiResponse<T> {
 class HealthApi {
     private client: AxiosInstance;
 
-    constructor(baseURL: string = 'http://localhost:3000/') {
+    constructor(baseURL: string = 'https://memory-leak-crisis-k1ab.vercel.app/') {
         this.client = axios.create({
             baseURL,
             timeout: 10000,

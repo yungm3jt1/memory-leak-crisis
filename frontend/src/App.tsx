@@ -15,7 +15,9 @@ function App() {
   const getChallenge = async () => {
     try {
       setAttackStatus("Fetching challenge...");
-      const response = await fetch("http://localhost:3000/challenge");
+      const response = await fetch(
+        "https://memory-leak-crisis-k1ab.vercel.app/challenge",
+      );
       if (!response.ok) throw new Error(`Server error: ${response.status}`);
       const data = await response.json();
       setChallenge(data.challenge);
@@ -27,9 +29,12 @@ function App() {
   };
 
   const restartGame = async () => {
-    const reposne = await fetch("http://localhost:3000/start", {
-      method: "POST",
-    });
+    const reposne = await fetch(
+      "https://memory-leak-crisis-k1ab.vercel.app/start",
+      {
+        method: "POST",
+      },
+    );
     const data = await reposne.json();
     if (reposne.ok) {
       setHealth(data.health);
@@ -42,9 +47,12 @@ function App() {
   const repairSystem = async () => {
     try {
       setAttackStatus("Initiating repair...");
-      const response = await fetch("http://localhost:3000/repair", {
-        method: "POST",
-      });
+      const response = await fetch(
+        "https://memory-leak-crisis-k1ab.vercel.app/repair",
+        {
+          method: "POST",
+        },
+      );
       const data = await response.json();
       if (response.ok) {
         setAttackStatus(`Repair successful! Health: ${data.health}%`);
@@ -64,14 +72,17 @@ function App() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/attack", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-challenge": challenge,
-          "x-nonce": nonce,
+      const response = await fetch(
+        "https://memory-leak-crisis-k1ab.vercel.app/attack",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-challenge": challenge,
+            "x-nonce": nonce,
+          },
         },
-      });
+      );
       const data = await response.json();
       if (response.ok) {
         setAttackStatus("Attack successful! Health: " + data.health);
