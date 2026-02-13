@@ -1,10 +1,12 @@
 import express from "express";
+import cors from "cors";
 import rateLimit from "express-rate-limit";
 import { createHash, randomBytes } from "crypto";
 import { db } from "./firebase";
 import { ref, push, set, get, child, serverTimestamp } from "firebase/database";
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 const port = 3000;
 
