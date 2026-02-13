@@ -115,6 +115,10 @@ app.post("/attack", verifyPoW, (req: express.Request, res: express.Response) => 
 	res.json({ message: "Attack launched", health });
 });
 
-app.listen(port, () => {
-	console.log(`Listening on port ${port}...`);
-});
+if (process.env.NODE_ENV !== 'production') {
+	app.listen(port, () => {
+		console.log(`Listening on port ${port}...`);
+	});
+}
+
+export default app;
