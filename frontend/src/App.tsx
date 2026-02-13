@@ -115,6 +115,11 @@ function App() {
     );
 
     const interval = setInterval(() => {
+      // Ping backend to trigger health update
+      fetch("https://memory-leak-crisis-k1ab.vercel.app/health").catch((e) =>
+        console.error("Ping failed", e),
+      );
+
       setRam(Math.floor(Math.random() * (64 - 16 + 1) + 16)); // 16-64GB
       setPing(Math.floor(Math.random() * (32 - 10 + 1) + 10));
     }, 2000);
