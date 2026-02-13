@@ -111,8 +111,8 @@ app.post("/repair", async (req: express.Request, res: express.Response) => {
 	res.json({ message: "Repair initiated", health });
 });
 
-app.await updateGameState();
-    post("/attack", verifyPoW, async (req: express.Request, res: express.Response) => {
+app.post("/attack", verifyPoW, async (req: express.Request, res: express.Response) => {
+    await updateGameState();
     // Get latest state first
     const snapshot = await get(child(ref(db), 'health'));
     if (snapshot.exists()) {
