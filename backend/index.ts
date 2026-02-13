@@ -12,6 +12,16 @@ app.use(cors({
     allowedHeaders: ["Content-Type", "x-challenge", "x-nonce"]
 }));
 app.use(express.json());
+
+// Disable caching for Vercel
+app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    res.set('Surrogate-Control', 'no-store');
+    next();
+});
+
 const port = 3000;
 
 let health = 100;

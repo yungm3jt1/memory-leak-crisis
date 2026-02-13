@@ -115,8 +115,8 @@ function App() {
     );
 
     const interval = setInterval(() => {
-      // Ping backend to trigger health update
-      fetch("https://memory-leak-crisis-k1ab.vercel.app/health").catch((e) =>
+      // Ping backend to trigger health update with cache busting
+      fetch(`https://memory-leak-crisis-k1ab.vercel.app/health?t=${Date.now()}`).catch((e) =>
         console.error("Ping failed", e),
       );
 
