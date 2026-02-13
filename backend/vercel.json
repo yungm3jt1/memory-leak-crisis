@@ -1,19 +1,7 @@
 {
     "rewrites": [
         {
-            "source": "/challenge",
-            "destination": "/index.ts"
-        },
-        {
-            "source": "/start",
-            "destination": "/index.ts"
-        },
-        {
-            "source": "/repair",
-            "destination": "/index.ts"
-        },
-        {
-            "source": "/attack",
+            "source": "/(.*)",
             "destination": "/index.ts"
         }
     ]
